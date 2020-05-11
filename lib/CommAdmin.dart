@@ -84,7 +84,7 @@ class _CommPage extends State<CommAdmin> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Row> list = messages.map((_message) {
+    /*final List<Row> list = messages.map((_message) {
       return Row(
         children: <Widget>[
           Container(
@@ -107,14 +107,21 @@ class _CommPage extends State<CommAdmin> {
             : MainAxisAlignment.start,
       );
     }).toList();
-
+  */
     return Scaffold(
       appBar: AppBar(
           title: (isConnecting
               ? Text('Connecting chat to ' + widget.server.name + '...')
               : isConnected
                   ? Text('Live chat with ' + widget.server.name)
-                  : Text('Chat log with ' + widget.server.name))),
+                  : Text('Chat log with ' + widget.server.name)),
+            actions: <Widget>[IconButton(
+                  icon: Icon(Icons.check),
+                  onPressed: () {
+                  _sendMessage(); // try to change the function such that there is no requirement of text as input
+                },
+                )
+        ],),
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -122,7 +129,8 @@ class _CommPage extends State<CommAdmin> {
               child: ListView(
                   padding: const EdgeInsets.all(12.0),
                   controller: listScrollController,
-                  children: list),
+                  //children: list), try to put in a form or table to edit
+              ),
             ),
             Row(
               children: <Widget>[
