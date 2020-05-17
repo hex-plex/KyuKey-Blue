@@ -31,6 +31,17 @@ class _CommPage extends State<CommAdmin> {
       new TextEditingController();
   final ScrollController listScrollController = new ScrollController();
 
+  final _formKey = GlobalKey<FormState>();
+
+  TextEditingController wifissid = TextEditingController();
+  TextEditingController passphrase = TextEditingController();
+  TextEditingController pin = TextEditingController();
+  TextEditingController deviceName = TextEditingController();
+  String initwifi="";
+  String initpassp="";
+  String initpin="";
+  String initname="";
+  int messageCount=-1;
   bool isConnecting = true;
   bool get isConnected => connection != null && connection.isConnected;
 
@@ -68,6 +79,8 @@ class _CommPage extends State<CommAdmin> {
       print('Cannot connect, exception occured');
       print(error);
     });
+    _sendMessage("info");
+
   }
 
   @override
@@ -110,29 +123,143 @@ class _CommPage extends State<CommAdmin> {
   */
     return Scaffold(
       appBar: AppBar(
+          backgroundColor: Colors.amber[800],
           title: (isConnecting
-              ? Text('Connecting chat to ' + widget.server.name + '...')
+              ? Text('Connecting to ' + widget.server.name + '...',style: TextStyle( ),)
               : isConnected
-                  ? Text('Live chat with ' + widget.server.name)
-                  : Text('Chat log with ' + widget.server.name)),
+                  ? Text('Connected with ' + widget.server.name)
+                  : Text('Previously connected with ' + widget.server.name)),
             actions: <Widget>[IconButton(
                   icon: Icon(Icons.check),
                   onPressed: () {
-                  _sendMessage(); // try to change the function such that there is no requirement of text as input
+                    String toChange="";
+                    if (wifissid.text!=initwifi)
+                      {toChange=toChange+"/sw"+wifissid.text+"/ew";}
+                    if (pin.text!=initpin)
+                      {toChange=toChange+"/spi"+pin.text+"/epi";}
+                    if (passphrase.text!=initpassp)
+                      {toChange=toChange+"/spp"+passphrase.text+"/epp";}
+                    if (deviceName.text!=initname)
+                      {toChange=toChange+"/sdn"+wifissid.text+"/edn";}    
+                  _sendMessage(
+                    toChange
+                  ); // try to change the function such that there is no requirement of text as input
+
                 },
+                ),
+                messageCount==messages.length?
+                FittedBox( 
+                              child: Container( 
+                                margin: new EdgeInsets.all(16.0),
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.red[700]),
+                                ),
+                              ),
+                            fit: BoxFit.contain,
+                            alignment: Alignment.centerRight,
+                            )
+                :            
+                IconButton(
+                  icon: Icon(Icons.replay),
+                  onPressed: () {  
+                  Timer(Duration(seconds: 1),(){_sendMessage("info");});
+
+               
+                setState(() {
+                   messageCount=messages.length;
+                });
+                }
                 )
         ],),
-      body: SafeArea(
+      body: Center(
         child: Column(
           children: <Widget>[
             Flexible(
               child: ListView(
                   padding: const EdgeInsets.all(12.0),
                   controller: listScrollController,
+                  children: <Widget>[
+                    Form(
+                  key: _formKey,
+                  child: Column(
+                    children : <Widget>[
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: TextFormField(
+                    controller: wifissid,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'wifissid',
+                    ),
+                    validator: (String value){
+                      if(value==""){
+                      return 'This is mandatory';
+                    }
+              
+                     return null;
+              
+                    },
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: TextFormField(
+                    obscureText: true,
+                    controller: passphrase,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Password',
+                      
+                    ),
+                  validator :(String value){
+                        if(value.isEmpty){
+                          return 'This is Essential';
+                        }
+                        return null;
+                      },
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: TextFormField(
+                    obscureText: true,
+                    controller: pin,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'PIN - device',
+                    ),
+                    validator :(String value){
+                        if(value==""){
+                          return 'this is mandatory';
+                        }
+                        return null;
+                      },
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: TextFormField(
+                    controller: deviceName,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Device-Name',
+                    ),
+                    validator :(String value){
+                        if(value==""){
+                          return 'this is mandatory';
+                        }
+                        return null;
+                      },
+                  ),
+                ),
+                  ],
+                  ),
+                    ),
+                  ],
                   //children: list), try to put in a form or table to edit
               ),
-            ),
-            Row(
+              ),
+            /*Row(
               children: <Widget>[
                 Flexible(
                   child: Container(
@@ -161,7 +288,7 @@ class _CommPage extends State<CommAdmin> {
                           : null),
                 ),
               ],
-            )
+            )*/
           ],
         ),
       ),
@@ -215,6 +342,15 @@ class _CommPage extends State<CommAdmin> {
               0, _messageBuffer.length - backspacesCounter)
           : _messageBuffer + dataString);
     }
+    if (dataString.indexOf("/sw")!=-1)
+      {wifissid.text=dataString.substring(dataString.indexOf("/sw")+4,dataString.indexOf("/ew"));initwifi=wifissid.text;}
+    if (dataString.indexOf("/spp")!=-1)
+      {passphrase.text=dataString.substring(dataString.indexOf("/spp")+5,dataString.indexOf("/epp"));initpassp=passphrase.text;}
+    if (dataString.indexOf("/spi")!=-1)
+      {pin.text=dataString.substring(dataString.indexOf("/spi")+5,dataString.indexOf("/epi"));initpin=pin.text;}
+    if (dataString.indexOf("/sdn")!=-1)
+      {deviceName.text=dataString.substring(dataString.indexOf("/sdn")+5,dataString.indexOf("/edn"));initname=deviceName.text;}
+    print(dataString);
   }
 
   void _sendMessage(String text) async {
