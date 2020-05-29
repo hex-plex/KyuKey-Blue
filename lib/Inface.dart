@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 import './BluetoothDeviceListEntry.dart';
-import './ChatPage.dart';
-import './BackgroundCollectingTask.dart';
-import './BackgroundCollectedPage.dart';
+import './CommAdmin.dart';
+//import './BackgroundCollectedPage.dart';
 
 class MainPage extends StatefulWidget {
   
@@ -27,8 +26,6 @@ class _MainPage extends State<MainPage> {
 
   Timer _discoverableTimeoutTimer;
   int _discoverableTimeoutSecondsLeft = 0;
-
-  BackgroundCollectingTask _collectingTask;
 
   bool _autoAcceptPairingRequests = false;
   BluetoothDevice selectedDevice=null;
@@ -124,7 +121,6 @@ class _MainPage extends State<MainPage> {
   @override
   void dispose() {
     FlutterBluetoothSerial.instance.setPairingRequestHandler(null);
-    _collectingTask?.dispose();
     _discoverableTimeoutTimer?.cancel();
     _streamSubscription?.cancel();
     super.dispose();
@@ -380,7 +376,7 @@ class _MainPage extends State<MainPage> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
-          return ChatPage(server: server);
+          return CommAdmin(server: server);
         },
       ),
     );

@@ -13,7 +13,7 @@ class BluetoothDeviceListEntry extends ListTile {
           onLongPress: onLongPress,
           enabled: enabled,
           leading:
-              Icon(Icons.devices), // @TODO . !BluetoothClass! class aware icon
+              Icon(Icons.devices), 
           title: Text(device.name ?? "Unknown device"),
           subtitle: Text(device.address.toString()),
           trailing: Row(
@@ -45,7 +45,7 @@ class BluetoothDeviceListEntry extends ListTile {
         );
 
   static TextStyle _computeTextStyle(int rssi) {
-    /**/ if (rssi >= -35)
+     if (rssi >= -35)
       return TextStyle(color: Colors.greenAccent[700]);
     else if (rssi >= -45)
       return TextStyle(
@@ -67,7 +67,7 @@ class BluetoothDeviceListEntry extends ListTile {
           color: Color.lerp(
               Colors.deepOrangeAccent, Colors.redAccent, -(rssi + 75) / 10));
     else
-      /*code symetry*/
+      
       return TextStyle(color: Colors.redAccent);
   }
 }
